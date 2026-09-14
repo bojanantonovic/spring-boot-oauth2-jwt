@@ -23,11 +23,7 @@ class JwtTestSupport {
 	private final JwtConfig jwtConfig = new JwtConfig();
 
 	JwtProperties properties(String secret, String issuer, long expirationMs) {
-		var jwtProperties = new JwtProperties();
-		jwtProperties.setSecret(secret);
-		jwtProperties.setIssuer(issuer);
-		jwtProperties.setExpirationMs(expirationMs);
-		return jwtProperties;
+		return new JwtProperties(secret, issuer, expirationMs);
 	}
 
 	JwtEncoder encoder(String secret) {

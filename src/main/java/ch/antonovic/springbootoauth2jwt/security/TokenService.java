@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Issues the access tokens returned by the authentication endpoints. Verification is not implemented here: it is
@@ -26,9 +27,9 @@ public class TokenService {
 	public String generateToken(UserDetails userDetails) {
 		var issuedAt = Instant.now();
 		var claims = JwtClaimsSet.builder()
-				.issuer(jwtProperties.getIssuer())
+				.issuer(jwtProperties.issuer())
 				.issuedAt(issuedAt)
-				.expiresAt(issuedAt.plusMillis(jwtProperties.getExpirationMs()))
+				.expiresAt(issuedAt.plusMillis(jwtProperties.expirationMs()))
 				.subject(userDetails.getUsername())
 				.claim(JwtConventions.ROLES_CLAIM, rolesOf(userDetails))
 				.build();
@@ -40,6 +41,7 @@ public class TokenService {
 	private static List<String> rolesOf(UserDetails userDetails) {
 		return userDetails.getAuthorities().stream()
 				.map(GrantedAuthority::getAuthority)
+				.filter(Objects::nonNull)
 				.filter(authority -> authority.startsWith(JwtConventions.ROLE_PREFIX))
 				.map(authority -> authority.substring(JwtConventions.ROLE_PREFIX.length()))
 				.toList();

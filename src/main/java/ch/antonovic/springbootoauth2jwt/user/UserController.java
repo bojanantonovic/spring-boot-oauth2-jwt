@@ -21,7 +21,7 @@ public class UserController {
 	 * so no database lookup is needed to answer the request.
 	 */
 	@GetMapping(ME_PATH)
-	public CurrentUserResponse me(@AuthenticationPrincipal Jwt jwt, Authentication authentication) {
+	public CurrentUserResponse getCurrentUser(@AuthenticationPrincipal Jwt jwt, Authentication authentication) {
 		var authorities = authentication.getAuthorities().stream()
 				.map(GrantedAuthority::getAuthority)
 				.toList();

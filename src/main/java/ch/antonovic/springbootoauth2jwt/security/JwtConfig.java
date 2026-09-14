@@ -24,7 +24,7 @@ public class JwtConfig {
 
 	@Bean
 	public SecretKey jwtSigningKey(JwtProperties jwtProperties) {
-		return new SecretKeySpec(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8),
+		return new SecretKeySpec(jwtProperties.secret().getBytes(StandardCharsets.UTF_8),
 								 JwtConventions.SECRET_KEY_ALGORITHM);
 	}
 
@@ -40,7 +40,7 @@ public class JwtConfig {
 		var jwtDecoder = NimbusJwtDecoder.withSecretKey(jwtSigningKey)
 				.macAlgorithm(JwtConventions.SIGNATURE_ALGORITHM)
 				.build();
-		jwtDecoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(jwtProperties.getIssuer()));
+		jwtDecoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(jwtProperties.issuer()));
 		return jwtDecoder;
 	}
 
