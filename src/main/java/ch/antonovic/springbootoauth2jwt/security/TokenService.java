@@ -2,7 +2,6 @@ package ch.antonovic.springbootoauth2jwt.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -33,9 +32,8 @@ public class TokenService {
 				.subject(subject)
 				.claim(JwtConventions.ROLES_CLAIM, rolesOf(authorities))
 				.build();
-		var header = JwsHeader.with(JwtConventions.SIGNATURE_ALGORITHM).build();
-
-		return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
+		final var jwtEncoderParameters = JwtEncoderParameters.from(JwtConventions.SIGNATURE_HEADER, claims);
+		return jwtEncoder.encode(jwtEncoderParameters).getTokenValue();
 	}
 
 	private static List<String> rolesOf(Collection<? extends GrantedAuthority> authorities) {

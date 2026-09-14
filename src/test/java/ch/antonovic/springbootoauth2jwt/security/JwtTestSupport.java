@@ -1,7 +1,6 @@
 package ch.antonovic.springbootoauth2jwt.security;
 
 import ch.antonovic.springbootoauth2jwt.TestFixtures;
-import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -51,9 +50,8 @@ class JwtTestSupport {
 				.expiresAt(issuedAt.plus(EXPIRED_TOKEN_LIFETIME))
 				.subject(TestFixtures.TEST_EMAIL)
 				.build();
-		var header = JwsHeader.with(JwtConventions.SIGNATURE_ALGORITHM).build();
-
-		return encoder(secret).encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
+		final var jwtEncoderParameters = JwtEncoderParameters.from(JwtConventions.SIGNATURE_HEADER, claims);
+		return encoder(secret).encode(jwtEncoderParameters).getTokenValue();
 	}
 
 	JwtException decodeFailure(String token, String secret, String issuer) {
