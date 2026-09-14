@@ -4,7 +4,6 @@ import ch.antonovic.springbootoauth2jwt.TestFixtures;
 import ch.antonovic.springbootoauth2jwt.auth.dto.LoginRequest;
 import ch.antonovic.springbootoauth2jwt.auth.dto.RegisterRequest;
 import ch.antonovic.springbootoauth2jwt.user.UserRepository;
-import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
@@ -234,7 +234,7 @@ class AuthControllerTest {
 				.andExpect(jsonPath("$.email").value(TestFixtures.TEST_EMAIL));
 	}
 
-	private String registerBody(String email, String password) throws Exception {
+	private String registerBody(String email, String password) {
 		return objectMapper.writeValueAsString(new RegisterRequest(email, password));
 	}
 

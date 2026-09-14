@@ -4,9 +4,6 @@ import ch.antonovic.springbootoauth2jwt.user.Role;
 import ch.antonovic.springbootoauth2jwt.user.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
-/**
- * Test data shared by the unit and the integration tests.
- */
 public final class TestFixtures {
 
 	public static final String TEST_EMAIL = "jane.doe@example.com";
@@ -21,7 +18,9 @@ public final class TestFixtures {
 	public static final long VALID_EXPIRATION_MS = 3600000L;
 	public static final String USER_AUTHORITY = "ROLE_USER";
 	public static final String ADMIN_AUTHORITY = "ROLE_ADMIN";
-	/** Authority Spring Security 7 adds for every request authenticated by a bearer token. */
+	/**
+	 * Authority Spring Security 7 adds for every request authenticated by a bearer token.
+	 */
 	public static final String BEARER_FACTOR_AUTHORITY = "FACTOR_BEARER";
 
 	public static UserDetails userDetails(String email) {

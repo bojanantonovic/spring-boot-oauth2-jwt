@@ -25,11 +25,13 @@ public class AuthController {
 
 	@PostMapping(REGISTER_PATH)
 	public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-		return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
+		final var authResponse = authService.register(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
 	}
 
 	@PostMapping(LOGIN_PATH)
 	public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-		return ResponseEntity.ok(authService.login(request));
+		final var authResponse = authService.login(request);
+		return ResponseEntity.ok(authResponse);
 	}
 }

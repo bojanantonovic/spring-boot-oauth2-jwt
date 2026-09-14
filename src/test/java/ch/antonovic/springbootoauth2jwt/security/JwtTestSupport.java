@@ -4,8 +4,8 @@ import ch.antonovic.springbootoauth2jwt.TestFixtures;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.jwt.JwtException;
 
 import java.time.Duration;
@@ -56,9 +56,6 @@ class JwtTestSupport {
 		return encoder(secret).encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
 	}
 
-	/**
-	 * @return the exception the decoder rejects the token with.
-	 */
 	JwtException decodeFailure(String token, String secret, String issuer) {
 		try {
 			decoder(secret, issuer).decode(token);

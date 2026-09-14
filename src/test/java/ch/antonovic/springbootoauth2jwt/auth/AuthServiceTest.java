@@ -16,7 +16,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,9 +46,6 @@ class AuthServiceTest {
 	@Mock
 	private TokenService tokenService;
 
-	@Mock
-	private UserDetailsService userDetailsService;
-
 	@InjectMocks
 	private AuthService authService;
 
@@ -55,11 +53,9 @@ class AuthServiceTest {
 	void givenNewEmail_whenRegister_thenSavesUserAndReturnsToken() {
 		// given
 		var request = new RegisterRequest(TestFixtures.TEST_EMAIL, TestFixtures.TEST_PASSWORD);
-		var userDetails = TestFixtures.userDetails(TestFixtures.TEST_EMAIL);
 		when(userRepository.existsByEmail(TestFixtures.TEST_EMAIL)).thenReturn(false);
 		when(passwordEncoder.encode(TestFixtures.TEST_PASSWORD)).thenReturn(TestFixtures.ENCODED_PASSWORD);
-		when(userDetailsService.loadUserByUsername(TestFixtures.TEST_EMAIL)).thenReturn(userDetails);
-		when(tokenService.generateToken(userDetails)).thenReturn(GENERATED_TOKEN);
+		when(tokenService.generateToken(any())).thenReturn(GENERATED_TOKEN);
 
 		// when
 		var response = authService.register(request);
@@ -74,6 +70,14 @@ class AuthServiceTest {
 		assertThat(savedUser.getEmail()).isEqualTo(TestFixtures.TEST_EMAIL);
 		assertThat(savedUser.getPassword()).isEqualTo(TestFixtures.ENCODED_PASSWORD);
 		assertThat(savedUser.getRole()).isEqualTo(Role.USER);
+
+		var userDetailsCaptor = ArgumentCaptor.forClass(UserDetails.class);
+		verify(tokenService).generateToken(userDetailsCaptor.capture());
+		var userDetails = userDetailsCaptor.getValue();
+		assertThat(userDetails.getUsername()).isEqualTo(TestFixtures.TEST_EMAIL);
+		assertThat(userDetails.getPassword()).isEqualTo(TestFixtures.ENCODED_PASSWORD);
+		assertThat(userDetails.getAuthorities()).extracting(GrantedAuthority::getAuthority)
+				.containsExactly(TestFixtures.USER_AUTHORITY);
 	}
 
 	@Test
@@ -95,7 +99,8 @@ class AuthServiceTest {
 		// given
 		var request = new LoginRequest(TestFixtures.TEST_EMAIL, TestFixtures.TEST_PASSWORD);
 		var userDetails = TestFixtures.userDetails(TestFixtures.TEST_EMAIL);
-		when(userDetailsService.loadUserByUsername(TestFixtures.TEST_EMAIL)).thenReturn(userDetails);
+		when(authenticationManager.authenticate(any())).thenReturn(UsernamePasswordAuthenticationToken
+																		   .authenticated(userDetails, null, userDetails.getAuthorities()));
 		when(tokenService.generateToken(userDetails)).thenReturn(GENERATED_TOKEN);
 
 		// when
@@ -116,6 +121,6 @@ class AuthServiceTest {
 
 		// when / then
 		assertThatThrownBy(() -> authService.login(request)).isInstanceOf(BadCredentialsException.class);
-		verifyNoInteractions(userDetailsService, tokenService);
+		verifyNoInteractions(tokenService);
 	}
 }
