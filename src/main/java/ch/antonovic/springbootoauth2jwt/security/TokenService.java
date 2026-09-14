@@ -1,6 +1,7 @@
 package ch.antonovic.springbootoauth2jwt.security;
 
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -24,16 +25,20 @@ public class TokenService {
 	private final JwtProperties jwtProperties;
 
 	public String generateToken(String subject, Collection<? extends GrantedAuthority> authorities) {
-		var issuedAt = Instant.now();
-		var claims = JwtClaimsSet.builder()
+		var claims = toClaims(subject, authorities);
+		final var jwtEncoderParameters = JwtEncoderParameters.from(JwtConventions.SIGNATURE_HEADER, claims);
+		return jwtEncoder.encode(jwtEncoderParameters).getTokenValue();
+	}
+
+	private @NonNull JwtClaimsSet toClaims(final String subject, final Collection<? extends GrantedAuthority> authorities) {
+		final Instant issuedAt = Instant.now();
+		return JwtClaimsSet.builder()
 				.issuer(jwtProperties.issuer())
 				.issuedAt(issuedAt)
 				.expiresAt(issuedAt.plusMillis(jwtProperties.expirationMs()))
 				.subject(subject)
 				.claim(JwtConventions.ROLES_CLAIM, rolesOf(authorities))
 				.build();
-		final var jwtEncoderParameters = JwtEncoderParameters.from(JwtConventions.SIGNATURE_HEADER, claims);
-		return jwtEncoder.encode(jwtEncoderParameters).getTokenValue();
 	}
 
 	private static List<String> rolesOf(Collection<? extends GrantedAuthority> authorities) {
