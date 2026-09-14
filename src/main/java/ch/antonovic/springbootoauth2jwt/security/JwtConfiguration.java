@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
  * {@code spring.security.oauth2.resourceserver.*} property is needed.
  */
 @Configuration
-public class JwtConfig {
+public class JwtConfiguration {
 
 	@Bean
 	public SecretKey jwtSigningKey(JwtProperties jwtProperties) {

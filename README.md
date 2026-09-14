@@ -17,9 +17,9 @@ tests — only the token handling differs.
 ## How the token handling works
 
 **Issuing** — `TokenService` builds a `JwtClaimsSet` (`iss`, `iat`, `exp`, `sub` and a custom `roles` claim) and
-signs it with the `JwtEncoder` from `JwtConfig` (`NimbusJwtEncoder`, HS256, shared secret).
+signs it with the `JwtEncoder` from `JwtConfiguration` (`NimbusJwtEncoder`, HS256, shared secret).
 
-**Verifying** — no application code is involved. `SecurityConfig` enables `oauth2ResourceServer(...jwt(...))`,
+**Verifying** — no application code is involved. `SecurityConfiguration` enables `oauth2ResourceServer(...jwt(...))`,
 which installs Spring Security's `BearerTokenAuthenticationFilter`. It reads the `Authorization` header, hands the
 token to the `JwtDecoder` bean (`NimbusJwtDecoder` plus `JwtValidators.createDefaultWithIssuer`) and answers with
 `401` and a `WWW-Authenticate: Bearer error="invalid_token"` header if anything is wrong — signature, `exp`, `nbf`

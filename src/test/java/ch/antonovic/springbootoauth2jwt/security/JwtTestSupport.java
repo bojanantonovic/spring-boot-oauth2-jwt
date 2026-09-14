@@ -12,7 +12,7 @@ import java.time.Duration;
 import java.time.Instant;
 
 /**
- * Builds the real encoder and decoder beans from {@link JwtConfig}, so the tests exercise the production wiring
+ * Builds the real encoder and decoder beans from {@link JwtConfiguration}, so the tests exercise the production wiring
  * instead of a look-alike configuration.
  */
 class JwtTestSupport {
@@ -20,19 +20,19 @@ class JwtTestSupport {
 	private static final Duration EXPIRED_TOKEN_AGE = Duration.ofHours(2);
 	private static final Duration EXPIRED_TOKEN_LIFETIME = Duration.ofHours(1);
 
-	private final JwtConfig jwtConfig = new JwtConfig();
+	private final JwtConfiguration jwtConfiguration = new JwtConfiguration();
 
 	JwtProperties properties(String secret, String issuer, long expirationMs) {
 		return new JwtProperties(secret, issuer, expirationMs);
 	}
 
 	JwtEncoder encoder(String secret) {
-		return jwtConfig.jwtEncoder(jwtConfig.jwtSigningKey(properties(secret, null, 0)));
+		return jwtConfiguration.jwtEncoder(jwtConfiguration.jwtSigningKey(properties(secret, null, 0)));
 	}
 
 	JwtDecoder decoder(String secret, String issuer) {
 		var jwtProperties = properties(secret, issuer, 0);
-		return jwtConfig.jwtDecoder(jwtConfig.jwtSigningKey(jwtProperties), jwtProperties);
+		return jwtConfiguration.jwtDecoder(jwtConfiguration.jwtSigningKey(jwtProperties), jwtProperties);
 	}
 
 	TokenService tokenService(String secret, String issuer, long expirationMs) {

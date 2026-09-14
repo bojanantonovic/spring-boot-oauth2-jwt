@@ -14,13 +14,13 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class JwtConfigTest {
+class JwtConfigurationTest {
 
 	private static final String HEADER_ALGORITHM_KEY = "alg";
 	private static final String TOKEN_VALUE = "irrelevant-for-the-converter";
 	private static final long ONE_HOUR_SECONDS = 3600L;
 
-	private final JwtConfig jwtConfig = new JwtConfig();
+	private final JwtConfiguration jwtConfiguration = new JwtConfiguration();
 	private final JwtTestSupport jwtTestSupport = new JwtTestSupport();
 
 	@Test
@@ -76,7 +76,7 @@ class JwtConfigTest {
 				.build();
 
 		// when
-		var authentication = jwtConfig.jwtAuthenticationConverter().convert(jwt);
+		var authentication = jwtConfiguration.jwtAuthenticationConverter().convert(jwt);
 
 		// then
 		assertThat(authentication).isNotNull();
@@ -99,7 +99,7 @@ class JwtConfigTest {
 				.build();
 
 		// when
-		var authentication = jwtConfig.jwtAuthenticationConverter().convert(jwt);
+		var authentication = jwtConfiguration.jwtAuthenticationConverter().convert(jwt);
 
 		// then
 		assertThat(authentication).isNotNull();

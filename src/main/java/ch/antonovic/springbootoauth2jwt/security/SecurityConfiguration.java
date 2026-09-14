@@ -22,7 +22,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
+public class SecurityConfiguration {
 
 	private static final String AUTH_ENDPOINTS = "/api/auth/**";
 	private static final String H2_CONSOLE_ENDPOINTS = "/h2-console/**";
