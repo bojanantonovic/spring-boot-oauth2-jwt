@@ -2,7 +2,10 @@ package ch.antonovic.springbootoauth2jwt;
 
 import ch.antonovic.springbootoauth2jwt.user.Role;
 import ch.antonovic.springbootoauth2jwt.user.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.util.List;
 
 public final class TestFixtures {
 
@@ -23,15 +26,8 @@ public final class TestFixtures {
 	 */
 	public static final String BEARER_FACTOR_AUTHORITY = "FACTOR_BEARER";
 
-	public static UserDetails userDetails(String email) {
-		return userDetails(email, USER_AUTHORITY);
-	}
-
-	public static UserDetails userDetails(String email, String authority) {
-		return org.springframework.security.core.userdetails.User.withUsername(email)
-				.password(ENCODED_PASSWORD)
-				.authorities(authority)
-				.build();
+	public static List<GrantedAuthority> authorities(String authority) {
+		return List.of(new SimpleGrantedAuthority(authority));
 	}
 
 	public static User user(String email, Role role) {

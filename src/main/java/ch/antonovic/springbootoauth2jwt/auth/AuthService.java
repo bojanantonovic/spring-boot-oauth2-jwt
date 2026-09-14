@@ -11,7 +11,6 @@ import ch.antonovic.springbootoauth2jwt.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,26 +28,31 @@ public class AuthService {
 			throw new EmailAlreadyInUseException(request.email());
 		}
 
-		var user = User.builder()
+		var user = toUser(request);
+		userRepository.save(user);
+
+		var userDetails = UserDetailsMapper.toUserDetails(user);
+		var token = tokenService.generateToken(userDetails.getUsername(), userDetails.getAuthorities());
+		return AuthResponse.of(token, user.getEmail());
+	}
+
+	private User toUser(final RegisterRequest request) {
+		return User.builder()
 				.email(request.email())
 				.password(passwordEncoder.encode(request.password()))
 				.role(Role.USER)
 				.build();
-		userRepository.save(user);
-
-		var token = tokenService.generateToken(UserDetailsMapper.toUserDetails(user));
-		return AuthResponse.of(token, user.getEmail());
 	}
 
 	/**
-	 * The principal of the returned {@code Authentication} is the {@link UserDetails} that the
-	 * {@code DaoAuthenticationProvider} already loaded to check the password, so the user is not read twice.
+	 * The returned {@code Authentication} already carries the name and the authorities that the
+	 * {@code DaoAuthenticationProvider} loaded to check the password, so the user is not read a second time.
 	 */
 	public AuthResponse login(LoginRequest request) {
 		var authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
-		var token = tokenService.generateToken((UserDetails) authentication.getPrincipal());
+		var token = tokenService.generateToken(authentication.getName(), authentication.getAuthorities());
 		return AuthResponse.of(token, request.email());
 	}
 }

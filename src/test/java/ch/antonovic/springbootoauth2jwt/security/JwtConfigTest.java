@@ -28,7 +28,7 @@ class JwtConfigTest {
 		// given
 		var foreignToken = jwtTestSupport
 				.tokenService(TestFixtures.OTHER_SECRET, TestFixtures.TEST_ISSUER, TestFixtures.VALID_EXPIRATION_MS)
-				.generateToken(TestFixtures.userDetails(TestFixtures.TEST_EMAIL));
+				.generateToken(TestFixtures.TEST_EMAIL, TestFixtures.authorities(TestFixtures.USER_AUTHORITY));
 
 		// when
 		var failure = jwtTestSupport.decodeFailure(foreignToken, TestFixtures.TEST_SECRET, TestFixtures.TEST_ISSUER);
@@ -42,7 +42,7 @@ class JwtConfigTest {
 		// given
 		var foreignToken = jwtTestSupport
 				.tokenService(TestFixtures.TEST_SECRET, TestFixtures.OTHER_ISSUER, TestFixtures.VALID_EXPIRATION_MS)
-				.generateToken(TestFixtures.userDetails(TestFixtures.TEST_EMAIL));
+				.generateToken(TestFixtures.TEST_EMAIL, TestFixtures.authorities(TestFixtures.USER_AUTHORITY));
 
 		// when
 		var failure = jwtTestSupport.decodeFailure(foreignToken, TestFixtures.TEST_SECRET, TestFixtures.TEST_ISSUER);

@@ -17,8 +17,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -55,7 +56,7 @@ class AuthServiceTest {
 		var request = new RegisterRequest(TestFixtures.TEST_EMAIL, TestFixtures.TEST_PASSWORD);
 		when(userRepository.existsByEmail(TestFixtures.TEST_EMAIL)).thenReturn(false);
 		when(passwordEncoder.encode(TestFixtures.TEST_PASSWORD)).thenReturn(TestFixtures.ENCODED_PASSWORD);
-		when(tokenService.generateToken(any())).thenReturn(GENERATED_TOKEN);
+		when(tokenService.generateToken(any(), any())).thenReturn(GENERATED_TOKEN);
 
 		// when
 		var response = authService.register(request);
@@ -71,12 +72,9 @@ class AuthServiceTest {
 		assertThat(savedUser.getPassword()).isEqualTo(TestFixtures.ENCODED_PASSWORD);
 		assertThat(savedUser.getRole()).isEqualTo(Role.USER);
 
-		var userDetailsCaptor = ArgumentCaptor.forClass(UserDetails.class);
-		verify(tokenService).generateToken(userDetailsCaptor.capture());
-		var userDetails = userDetailsCaptor.getValue();
-		assertThat(userDetails.getUsername()).isEqualTo(TestFixtures.TEST_EMAIL);
-		assertThat(userDetails.getPassword()).isEqualTo(TestFixtures.ENCODED_PASSWORD);
-		assertThat(userDetails.getAuthorities()).extracting(GrantedAuthority::getAuthority)
+		ArgumentCaptor<Collection<? extends GrantedAuthority>> authoritiesCaptor = ArgumentCaptor.captor();
+		verify(tokenService).generateToken(eq(TestFixtures.TEST_EMAIL), authoritiesCaptor.capture());
+		assertThat(authoritiesCaptor.getValue()).extracting(GrantedAuthority::getAuthority)
 				.containsExactly(TestFixtures.USER_AUTHORITY);
 	}
 
@@ -98,10 +96,10 @@ class AuthServiceTest {
 	void givenValidCredentials_whenLogin_thenReturnsToken() {
 		// given
 		var request = new LoginRequest(TestFixtures.TEST_EMAIL, TestFixtures.TEST_PASSWORD);
-		var userDetails = TestFixtures.userDetails(TestFixtures.TEST_EMAIL);
+		var authorities = TestFixtures.authorities(TestFixtures.USER_AUTHORITY);
 		when(authenticationManager.authenticate(any())).thenReturn(UsernamePasswordAuthenticationToken
-																		   .authenticated(userDetails, null, userDetails.getAuthorities()));
-		when(tokenService.generateToken(userDetails)).thenReturn(GENERATED_TOKEN);
+																		   .authenticated(TestFixtures.TEST_EMAIL, null, authorities));
+		when(tokenService.generateToken(TestFixtures.TEST_EMAIL, authorities)).thenReturn(GENERATED_TOKEN);
 
 		// when
 		var response = authService.login(request);

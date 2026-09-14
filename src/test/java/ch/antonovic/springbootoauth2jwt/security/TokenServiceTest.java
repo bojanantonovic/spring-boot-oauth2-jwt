@@ -10,13 +10,13 @@ class TokenServiceTest {
 	private final JwtTestSupport jwtTestSupport = new JwtTestSupport();
 
 	@Test
-	void givenUserDetails_whenGenerateToken_thenTokenCarriesSubjectIssuerAndExpiry() {
+	void whenGenerateToken_thenTokenCarriesSubjectIssuerAndExpiry() {
 		// given
 		var tokenService = tokenService();
-		var userDetails = TestFixtures.userDetails(TestFixtures.TEST_EMAIL);
 
 		// when
-		var token = tokenService.generateToken(userDetails);
+		var token = tokenService.generateToken(TestFixtures.TEST_EMAIL,
+											   TestFixtures.authorities(TestFixtures.USER_AUTHORITY));
 
 		// then
 		var decodedToken = decode(token);
@@ -28,13 +28,13 @@ class TokenServiceTest {
 	}
 
 	@Test
-	void givenUserDetailsWithRole_whenGenerateToken_thenRolesClaimHoldsRoleWithoutPrefix() {
+	void givenPrefixedAuthority_whenGenerateToken_thenRolesClaimHoldsRoleWithoutPrefix() {
 		// given
 		var tokenService = tokenService();
-		var userDetails = TestFixtures.userDetails(TestFixtures.TEST_EMAIL, TestFixtures.ADMIN_AUTHORITY);
 
 		// when
-		var token = tokenService.generateToken(userDetails);
+		var token = tokenService.generateToken(TestFixtures.TEST_EMAIL,
+											   TestFixtures.authorities(TestFixtures.ADMIN_AUTHORITY));
 
 		// then
 		assertThat(decode(token).getClaimAsStringList(JwtConventions.ROLES_CLAIM)).containsExactly("ADMIN");
@@ -45,7 +45,8 @@ class TokenServiceTest {
 		// given
 		var foreignTokenService = jwtTestSupport.tokenService(TestFixtures.OTHER_SECRET, TestFixtures.TEST_ISSUER,
 															  TestFixtures.VALID_EXPIRATION_MS);
-		var foreignToken = foreignTokenService.generateToken(TestFixtures.userDetails(TestFixtures.TEST_EMAIL));
+		var foreignToken = foreignTokenService.generateToken(TestFixtures.TEST_EMAIL,
+															 TestFixtures.authorities(TestFixtures.USER_AUTHORITY));
 
 		// when
 		var failure = jwtTestSupport.decodeFailure(foreignToken, TestFixtures.TEST_SECRET, TestFixtures.TEST_ISSUER);
