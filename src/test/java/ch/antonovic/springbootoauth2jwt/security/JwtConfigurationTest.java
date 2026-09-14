@@ -3,6 +3,7 @@ package ch.antonovic.springbootoauth2jwt.security;
 import ch.antonovic.springbootoauth2jwt.TestFixtures;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.jwt.JoseHeaderNames;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.jwt.JwtValidationException;
@@ -16,7 +17,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class JwtConfigurationTest {
 
-	private static final String HEADER_ALGORITHM_KEY = "alg";
 	private static final String TOKEN_VALUE = "irrelevant-for-the-converter";
 	private static final long ONE_HOUR_SECONDS = 3600L;
 
@@ -68,7 +68,7 @@ class JwtConfigurationTest {
 		// given
 		var issuedAt = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 		var jwt = Jwt.withTokenValue(TOKEN_VALUE)
-				.header(HEADER_ALGORITHM_KEY, JwtConventions.SIGNATURE_ALGORITHM.getName())
+				.header(JoseHeaderNames.ALG, JwtConventions.SIGNATURE_ALGORITHM.getName())
 				.subject(TestFixtures.TEST_EMAIL)
 				.issuedAt(issuedAt)
 				.expiresAt(issuedAt.plusSeconds(ONE_HOUR_SECONDS))
@@ -92,7 +92,7 @@ class JwtConfigurationTest {
 		// given
 		var issuedAt = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 		var jwt = Jwt.withTokenValue(TOKEN_VALUE)
-				.header(HEADER_ALGORITHM_KEY, JwtConventions.SIGNATURE_ALGORITHM.getName())
+				.header(JoseHeaderNames.ALG, JwtConventions.SIGNATURE_ALGORITHM.getName())
 				.claims(claims -> claims.putAll(Map.of(JwtClaimNames.SUB, TestFixtures.TEST_EMAIL)))
 				.issuedAt(issuedAt)
 				.expiresAt(issuedAt.plusSeconds(ONE_HOUR_SECONDS))
