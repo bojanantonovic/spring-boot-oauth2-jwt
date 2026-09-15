@@ -11,8 +11,11 @@ import ch.antonovic.springbootoauth2jwt.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Collection;
 
 @Service
 @RequiredArgsConstructor
@@ -32,8 +35,7 @@ public class AuthService {
 		userRepository.save(user);
 
 		var userDetails = UserDetailsMapper.toUserDetails(user);
-		var token = tokenService.generateToken(userDetails.getUsername(), userDetails.getAuthorities());
-		return AuthResponse.of(token, user.getEmail());
+		return toAuthResponse(userDetails.getUsername(), userDetails.getAuthorities());
 	}
 
 	private User toUser(final RegisterRequest request) {
@@ -52,7 +54,14 @@ public class AuthService {
 		var authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
-		var token = tokenService.generateToken(authentication.getName(), authentication.getAuthorities());
-		return AuthResponse.of(token, request.email());
+		return toAuthResponse(authentication.getName(), authentication.getAuthorities());
+	}
+
+	/**
+	 * The one place where an issued token becomes a response, so the {@code sub} claim of the token and the email
+	 * the client is told about cannot drift apart.
+	 */
+	private AuthResponse toAuthResponse(final String email, final Collection<? extends GrantedAuthority> authorities) {
+		return AuthResponse.of(tokenService.generateToken(email, authorities), email);
 	}
 }

@@ -1,5 +1,6 @@
 package ch.antonovic.springbootoauth2jwt.security;
 
+import ch.antonovic.springbootoauth2jwt.user.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,6 +11,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
@@ -29,6 +32,8 @@ public class SecurityConfiguration {
 	private static final String ALL_ENDPOINTS = "/**";
 	private static final List<String> ALLOWED_METHODS = List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
 	private static final String ALL_HEADERS = "*";
+
+	private static final String USER_NOT_FOUND_MESSAGE = "No user found with email: ";
 
 	/**
 	 * There is no hand-written bearer token filter: {@code oauth2ResourceServer} installs Spring Security's own
@@ -56,10 +61,21 @@ public class SecurityConfiguration {
 	}
 
 	/**
+	 * Only used while issuing a token, that is on {@code /api/auth/**}. Requests carrying a bearer token are
+	 * authenticated from the token itself and never reach this lookup.
+	 */
+	@Bean
+	public UserDetailsService userDetailsService(UserRepository userRepository) {
+		return email -> userRepository.findByEmail(email)
+				.map(UserDetailsMapper::toUserDetails)
+				.orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE + email));
+	}
+
+	/**
 	 * Only used by the login endpoint: it is the one place where a password is checked against the database.
 	 */
 	@Bean
-	public DaoAuthenticationProvider authenticationProvider(CustomUserDetailsService userDetailsService,
+	public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService,
 															PasswordEncoder passwordEncoder) {
 		var provider = new DaoAuthenticationProvider(userDetailsService);
 		provider.setPasswordEncoder(passwordEncoder);
